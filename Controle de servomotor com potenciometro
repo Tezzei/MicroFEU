@@ -1,0 +1,32 @@
+from machine import ADC, Pin, PWM
+import time
+
+#funcão map do arduino, funciona como uma regra de 3
+def mapValores(x, entrada_min, entrada_max, saida_min, saida_max):
+    return int((x - entrada_min) * (saida_max - saida_min) / (entrada_max - entrada_min) + saida_min)
+
+
+#criando um objeto 'potenciometro' que vai usar o conversor analógico digital
+pot = ADC(Pin(36))
+
+#criando um objeto 'servo' que vai usar o conversor analógico digital
+servo = PWM(Pin(22, mode=Pin.OUT))
+servo.freq(50)
+
+#tempo de delay
+tempoEspera = 1 #[s]
+
+#loop infinito 
+while True:
+    valor = pot.read() #leitura do potenciometro
+
+    '''Mapeamento de Valores:
+       -O servo calibrado nesse simulador aceita valores entre 26 e 123
+       -A GPIO36 (Sensor VP) usada pelo potenciometro possui o padrão
+        de 12bits, logo, lê valores entre 0 e 4095
+    '''
+    valor = mapValores(valor, 0, 4095, 26, 123) #atualiza a var. com valores mapeados
+    time.sleep(tempoEspera) #espera
+    print(f"Angulo do Servo:\t{mapValores(valor, 26, 123, 0, 180)}º")
+
+    servo.duty(valor) #passa o valor que o servo deve virar  
